@@ -1,6 +1,10 @@
-use crate::models::Weather;
+use crate::weather::Weather;
 use colored::*;
-use std::{collections::HashMap, fs};
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::Write,
+};
 use uuid::Uuid;
 
 pub fn load_weathers_from_file(file_path: &str) -> HashMap<Uuid, Weather> {
@@ -39,5 +43,30 @@ pub fn load_weathers_from_file(file_path: &str) -> HashMap<Uuid, Weather> {
             );
             HashMap::new()
         }
+    }
+}
+
+pub fn save_weathers_to_file(weathers: &HashMap<Uuid, Weather>, file_path: &str) {
+    match File::create(file_path) {
+        Ok(mut file) => {
+            let json = serde_json::to_string_pretty(weathers).unwrap();
+            if let Err(error) = file.write_all(json.as_bytes()) {
+                eprintln!(
+                    "{}",
+                    format!("❌ Failed to write to file: {error}").red().bold()
+                )
+            } else {
+                println!(
+                    "{}",
+                    format!("💾 Weathers saved successfully to {file_path}")
+                        .green()
+                        .bold()
+                );
+            }
+        }
+        Err(error) => eprintln!(
+            "{}",
+            format!("❌ Failed to create file: {error}").red().bold()
+        ),
     }
 }

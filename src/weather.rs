@@ -1,17 +1,19 @@
 use std::fmt::{Display, Formatter, Result};
 
 use colored::Colorize;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
+use crate::input::AddWeatherInput;
+
+#[derive(Debug, Clone, Copy, Serialize, PartialEq, Deserialize)]
 pub enum WeatherCondition {
     Sunny,
     Rainy,
     Cloudy,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Weather {
     pub id: Uuid,
     pub city: String,
@@ -55,5 +57,17 @@ impl Display for Weather {
         );
 
         f.write_str(&weather_block)
+    }
+}
+
+impl Weather {
+    pub fn new(input: AddWeatherInput) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            city: input.city,
+            temperature: input.temperature,
+            humidity: input.humidity,
+            condition: input.condition,
+        }
     }
 }

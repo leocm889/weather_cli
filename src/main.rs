@@ -1,8 +1,9 @@
 use colored::*;
 pub mod data;
 pub mod forecast;
-pub mod models;
+pub mod input;
 pub mod utils;
+pub mod weather;
 use forecast::search_weather_by_name;
 use utils::read_input;
 
