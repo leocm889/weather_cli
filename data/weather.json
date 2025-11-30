@@ -1,0 +1,23 @@
+[
+  {
+    "id": "632eb08f-be4b-4550-a345-0f9cda860615",
+    "city": "New York",
+    "temperature": 22,
+    "humidity": 70,
+    "condition": "Sunny"
+  },
+  {
+    "id": "670443f6-e078-4b69-ae17-899d57e25663",
+    "city": "London",
+    "temperature": 15,
+    "humidity": 80,
+    "condition": "Rainy"
+  },
+  {
+    "id": "b066d130-60b8-4b37-8b13-c1d3e5b5057e",
+    "city": "Tokyo",
+    "temperature": 28,
+    "humidity": 65,
+    "condition": "Cloudy"
+  }
+]
