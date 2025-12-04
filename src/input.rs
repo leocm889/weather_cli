@@ -1,9 +1,9 @@
-use crate::weather::WeatherCondition;
+use crate::weather::{Temperature, WeatherCondition};
 
 #[derive(Debug, Clone)]
 pub struct AddWeatherInput {
     pub city: String,
-    pub temperature: i32,
+    pub temperature: Temperature,
     pub humidity: u8,
     pub condition: WeatherCondition,
 }

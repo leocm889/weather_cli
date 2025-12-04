@@ -1,7 +1,9 @@
+use std::cmp::Reverse;
+
 use crate::data::{load_weathers_from_file, save_weathers_to_file};
 use crate::input::AddWeatherInput;
 use crate::utils::read_input;
-use crate::weather::{Weather, WeatherCondition};
+use crate::weather::{Temperature, Weather, WeatherCondition};
 use colored::*;
 use uuid::Uuid;
 
@@ -47,6 +49,53 @@ pub fn search_weather_by_name(file_path: &str, query: &str) {
     });
 }
 
+pub fn search_weather_by_temp_range(file_path: &str, min: i32, max: i32) {
+    search_weather(file_path, move |weather| {
+        weather.temperature >= min && weather.temperature <= max
+    });
+}
+
+pub fn search_menu(file_path: &str) {
+    loop {
+        println!("{}", "Search by:".blue().bold());
+        println!("{}", "1. ID".cyan());
+        println!("{}", "2. City".magenta());
+        println!("{}", "3. Temperature range".yellow());
+        println!("{}", "4. Back to main menu".red());
+
+        let choice = read_input::<u32>();
+
+        match choice {
+            1 => {
+                println!("{}", "Enter the ID to search:".blue().bold());
+                let id_input = read_input::<String>();
+                match Uuid::parse_str(&id_input) {
+                    Ok(id) => {
+                        search_weather_by_id(file_path, id);
+                    }
+                    Err(_) => println!("{}", "⚠️ Invalid UUID format.".red()),
+                }
+            }
+            2 => {
+                println!("{}", "Enter the name of the city to search:".blue().bold());
+                let name_query = read_input::<String>();
+                search_weather_by_name(file_path, &name_query);
+            }
+            3 => {
+                println!("{}", "Enter minimum temperature".blue().bold());
+                let min = read_input::<i32>();
+
+                println!("{}", "Enter maximum temperature".blue().bold());
+                let max = read_input::<i32>();
+
+                search_weather_by_temp_range(file_path, min, max);
+            }
+            4 => break,
+            _ => println!("{}", "❌ Invalid choice, try again.".red().bold()),
+        }
+    }
+}
+
 pub fn add_weather(file_path: &str) {
     let mut weathers = load_weathers_from_file(file_path);
 
@@ -64,7 +113,7 @@ pub fn add_weather(file_path: &str) {
 
     let city = read_input::<String>();
 
-    println!("{}", "Enter city's tempperature:".blue().bold());
+    println!("{}", "Enter city's temperature:".blue().bold());
 
     let temperature = read_input::<i32>();
 
@@ -85,6 +134,53 @@ pub fn add_weather(file_path: &str) {
     println!("{}", "Weather added successfully.".green().bold());
 }
 
+pub fn retrive_weathers_sorted(file_path: &str) {
+    loop {
+        let weathers = load_weathers_from_file(file_path);
+
+        if weathers.is_empty() {
+            println!("{}", " No weathers found.".red().bold());
+            return;
+        }
+
+        println!("{}", "Sort weathers by:".blue().bold());
+        println!("{}", "1. Temperature ascending".yellow());
+        println!("{}", "2. Temperature descending".cyan());
+        println!("{}", "3. City name".magenta());
+        println!("{}", "4. Back to main menu".red());
+
+        let choice = read_input::<u32>();
+
+        let mut weather_list: Vec<&Weather> = weathers.values().collect();
+
+        match choice {
+            1 => {
+                weather_list.sort_by_key(|w| w.temperature);
+            }
+            2 => {
+                weather_list.sort_by_key(|&w| Reverse(w.temperature));
+            }
+            3 => {
+                weather_list.sort_by_key(|&w| &w.city);
+            }
+            4 => break,
+            _ => {
+                println!(
+                    "{}",
+                    "Invalid choice, displaying in default creation order."
+                        .red()
+                        .bold()
+                );
+            }
+        }
+
+        println!("{}", "--- Weathers ---".bold().blue());
+        for weather in &weather_list {
+            println!("{weather}");
+        }
+    }
+}
+
 fn read_condition() -> WeatherCondition {
     loop {
         println!("{}", "Choose weather condition of the city:".blue().bold());
@@ -103,5 +199,18 @@ fn read_condition() -> WeatherCondition {
                 continue;
             }
         }
+    }
+}
+
+fn parse_temperature(input: &str) -> Temperature {
+    let input = input.trim().to_uppercase();
+
+    if input.ends_with("C") {
+        let value = input.trim_end_matches("C").parse::<f32>().unwrap();
+        Temperature::Celcius(value)
+    } else if input.ends_with("F") {
+        let value = input.trim_end_matches("F").parse::<f32>().unwrap();
+    } else {
+        panic!("Invalid format. Example: 25C or 77F");
     }
 }
