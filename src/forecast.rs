@@ -1,5 +1,3 @@
-use std::cmp::Reverse;
-
 use crate::data::{load_weathers_from_file, save_weathers_to_file};
 use crate::input::AddWeatherInput;
 use crate::utils::read_input;
@@ -49,9 +47,10 @@ pub fn search_weather_by_name(file_path: &str, query: &str) {
     });
 }
 
-pub fn search_weather_by_temp_range(file_path: &str, min: i32, max: i32) {
+pub fn search_weather_by_temp_range(file_path: &str, min: f32, max: f32) {
     search_weather(file_path, move |weather| {
-        weather.temperature >= min && weather.temperature <= max
+        let temp_c = weather.temperature.to_celsius();
+        temp_c >= min && temp_c <= max
     });
 }
 
@@ -83,10 +82,10 @@ pub fn search_menu(file_path: &str) {
             }
             3 => {
                 println!("{}", "Enter minimum temperature".blue().bold());
-                let min = read_input::<i32>();
+                let min = read_input::<f32>();
 
                 println!("{}", "Enter maximum temperature".blue().bold());
-                let max = read_input::<i32>();
+                let max = read_input::<f32>();
 
                 search_weather_by_temp_range(file_path, min, max);
             }
@@ -113,9 +112,12 @@ pub fn add_weather(file_path: &str) {
 
     let city = read_input::<String>();
 
-    println!("{}", "Enter city's temperature:".blue().bold());
-
-    let temperature = read_input::<i32>();
+    println!(
+        "{}",
+        "Enter city's temperature (e.g., 25C, 77F):".blue().bold()
+    );
+    let temp_input = read_input::<String>();
+    let temperature = parse_temperature(&temp_input);
 
     println!("{}", "Enter city's humidity:".blue().bold());
 
@@ -155,13 +157,23 @@ pub fn retrive_weathers_sorted(file_path: &str) {
 
         match choice {
             1 => {
-                weather_list.sort_by_key(|w| w.temperature);
+                weather_list.sort_by(|a, b| {
+                    a.temperature
+                        .to_celsius()
+                        .partial_cmp(&b.temperature.to_celsius())
+                        .unwrap()
+                });
             }
             2 => {
-                weather_list.sort_by_key(|&w| Reverse(w.temperature));
+                weather_list.sort_by(|a, b| {
+                    b.temperature
+                        .to_celsius()
+                        .partial_cmp(&a.temperature.to_celsius())
+                        .unwrap()
+                });
             }
             3 => {
-                weather_list.sort_by_key(|&w| &w.city);
+                weather_list.sort_by(|a, b| a.city.cmp(&b.city));
             }
             4 => break,
             _ => {
@@ -207,9 +219,10 @@ fn parse_temperature(input: &str) -> Temperature {
 
     if input.ends_with("C") {
         let value = input.trim_end_matches("C").parse::<f32>().unwrap();
-        Temperature::Celcius(value)
+        Temperature::Celsius(value)
     } else if input.ends_with("F") {
         let value = input.trim_end_matches("F").parse::<f32>().unwrap();
+        Temperature::Fahrenheit(value)
     } else {
         panic!("Invalid format. Example: 25C or 77F");
     }
