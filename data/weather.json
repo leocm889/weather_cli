@@ -2,28 +2,36 @@
   "b066d130-60b8-4b37-8b13-c1d3e5b5057e": {
     "id": "b066d130-60b8-4b37-8b13-c1d3e5b5057e",
     "city": "Tokyo",
-    "temperature": 28,
+    "temperature": {
+      "Celsius": 28
+    },
     "humidity": 65,
     "condition": "Cloudy"
   },
   "69bac7fb-2be2-4e04-a4e8-833a182c662e": {
     "id": "69bac7fb-2be2-4e04-a4e8-833a182c662e",
     "city": "Ubud",
-    "temperature": 24,
+    "temperature": {
+      "Celsius": 24
+    },
     "humidity": 91,
     "condition": "Rainy"
   },
   "670443f6-e078-4b69-ae17-899d57e25663": {
     "id": "670443f6-e078-4b69-ae17-899d57e25663",
     "city": "London",
-    "temperature": 15,
+    "temperature": {
+      "Celsius": 15
+    },
     "humidity": 80,
     "condition": "Rainy"
   },
   "632eb08f-be4b-4550-a345-0f9cda860615": {
     "id": "632eb08f-be4b-4550-a345-0f9cda860615",
     "city": "New York",
-    "temperature": 22,
+    "temperature": {
+      "Celsius": 22
+    },
     "humidity": 70,
     "condition": "Sunny"
   }

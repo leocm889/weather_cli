@@ -7,30 +7,52 @@ use std::{
 };
 use uuid::Uuid;
 
+pub fn load_weather() -> Vec<Weather> {
+    let file_path = "data/weather.json";
+
+    let data = fs::read_to_string(file_path).expect("Failed to read weather.json");
+
+    let parsed: serde_json::Result<Vec<Weather>> = serde_json::from_str(&data);
+
+    match parsed {
+        Ok(list) => {
+            println!(
+                "{}",
+                format!("✔  Weather loaded from {file_path}").green().bold()
+            );
+            list
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to parse JSON: {e}");
+            vec![]
+        }
+    }
+}
+
 pub fn load_weathers_from_file(file_path: &str) -> HashMap<Uuid, Weather> {
     let file_content = fs::read_to_string(file_path);
 
     match file_content {
         Ok(data) => {
-            let parsed: Result<Vec<Weather>, _> = serde_json::from_str(&data);
+            let parsed: serde_json::Result<std::collections::HashMap<String, Weather>> =
+                serde_json::from_str(&data);
 
             match parsed {
-                Ok(list) => {
+                Ok(map) => {
                     println!(
                         "{}",
                         format!("Weathers loaded successfully from {file_path}")
                             .green()
                             .bold()
                     );
-
-                    list.into_iter().map(|w| (w.id, w)).collect()
+                    map.into_values().collect()
                 }
                 Err(error) => {
                     eprintln!(
                         "{}",
                         format!("❌ Failed to parse JSON: {error}").red().bold()
                     );
-                    HashMap::new()
+                    vec![]
                 }
             }
         }

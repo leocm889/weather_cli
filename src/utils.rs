@@ -1,4 +1,7 @@
+use std::io;
+
 use colored::*;
+use thiserror::Error;
 
 pub fn read_input<T: std::str::FromStr>() -> T {
     loop {
@@ -12,4 +15,12 @@ pub fn read_input<T: std::str::FromStr>() -> T {
             }
         }
     }
+}
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("error reading the DB file: {0}")]
+    ReadDBError(#[from] io::Error),
+    #[error("error parsing the DB file: {0}")]
+    ParseDBError(#[from] serde_json::Error),
 }

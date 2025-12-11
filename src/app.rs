@@ -1,4 +1,6 @@
-use crate::weather::Weather;
+use std::time::{Duration, Instant};
+
+use crate::{data::load_weathers_from_file, weather::Weather};
 
 pub struct App {
     pub query: String,
@@ -7,6 +9,8 @@ pub struct App {
     pub mode: Mode,
     pub running: bool,
     pub file_path: String,
+    pub last_tick: Instant,
+    pub tick_rate: Duration,
 }
 
 pub enum Mode {
@@ -25,6 +29,29 @@ impl App {
             mode: Mode::Search,
             running: true,
             file_path: "data/weather.json".to_string(),
+            last_tick: Instant::now(),
+            tick_rate: Duration::from_secs(5),
+        }
+    }
+
+    pub fn search(&mut self) {
+        let weathers = load_weathers_from_file(&self.file_path);
+
+        if self.query.is_empty() {
+            self.results = weathers.values().cloned().collect();
+            self.cursor = 0;
+            return;
+        }
+
+        let lower = self.query.to_lowercase();
+        self.results = weathers
+            .values()
+            .filter(|w| w.city.to_lowercase().contains(&lower))
+            .cloned()
+            .collect();
+
+        if self.cursor >= self.results.len() {
+            self.cursor = 0;
         }
     }
 
@@ -45,14 +72,24 @@ impl App {
     }
 
     pub fn move_down(&mut self) {
-        if self.cursor < self.results.len() - 1 {
+        if !self.results.is_empty() && self.cursor < self.results.len() - 1 {
             self.cursor += 1;
         }
     }
 
-    pub fn confirm(&mut self) {}
+    pub fn confirm(&mut self) {
+        if self.results.is_empty() {
+            return;
+        }
+        self.mode = Mode::Details;
+    }
 
-    pub fn on_tick(&mut self) {}
+    pub fn on_tick(&mut self) {
+        if self.last_tick.elapsed() >= self.tick_rate {
+            self.search();
+            self.last_tick = Instant::now();
+        }
+    }
 
     pub fn quit(&mut self) {
         self.running = false;
